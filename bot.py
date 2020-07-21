@@ -4,13 +4,13 @@ from datetime import datetime
 #*********************************************************
 
 ist = pendulum.timezone('Asia/Calcutta')
-dt_now = datetime.now(ist)
+
 dt_now_str = str(datetime.now(ist))
 
 time_now = dt_now_str[11:16]
+hour_now = dt_now_str[11:13]
 
 date = dt_now_str[0:10]
-day_name= ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday','Sunday']
 day = datetime.strptime(date, '%Y-%m-%d').weekday()
 
 time_table = [
@@ -33,6 +33,18 @@ p3 = {'09:40', '09:41', '09:42', '09:43', '09:44', '09:45', '09:46', '09:47', '0
 p4 = {'10:30', '10:31', '10:32', '10:33', '10:34', '10:35', '10:36', '10:37', '10:38', '10:39', '10:40', '10:41', '10:42', '10:43', '10:44', '10:45', '10:46', '10:47', '10:48', '10:49', '10:50', '10:51', '10:52', '10:53', '10:54', '10:55', '10:56', '10:57', '10:58', '10:59', '11:00', '11:01', '11:02', '11:03', '11:04', '11:05', '11:06', '11:07', '11:08', '11:09'}
 p5 = {'11:20', '11:21', '11:22', '11:23', '11:24', '11:25', '11:26', '11:27', '11:28', '11:29', '11:30', '11:31', '11:32', '11:33', '11:34', '11:35', '11:36', '11:37', '11:38', '11:39', '11:40', '11:41', '11:42', '11:43', '11:44', '11:45', '11:46', '11:47', '11:48', '11:49', '11:50', '11:51', '11:52', '11:53', '11:54', '11:55', '11:56', '11:57', '11:58', '11:59'}
 
+
+def refresh_time():
+	global dt_now_str
+	global time_now
+	global hour_now
+	global day
+
+	dt_now_str = str(datetime.now(ist))
+	day = datetime.strptime(date, '%Y-%m-%d').weekday()
+	time_now = dt_now_str[11:16]
+	hour_now = dt_now_str[11:13]
+
 def find_period(current_time):
 	if current_time in break1:
 		return 6
@@ -52,18 +64,27 @@ def find_period(current_time):
 		return 3
 	elif current_time in p5:
 		return 4
-	else:
 		#No class is going on
+		#after class
+	elif int(current_time[0:2]) >= 12 and int(current_time[0:2]) <= 24:
 		return 5
-
+	else:	
+		#morning time
+		return 10
+		
 def class_now(day, time):
 	global time_table
 	period = find_period(time)
+	#Sunday filter
+	if day == 6:
+		return "It's SUNDAY"
 
 	if period in {6,7,8,9}:
 		return "It's break time baby"
 	elif period == 5:
-		return "Class Ended Moron!"
+		return "Class Ended!!!"		
+	elif period == 10:
+		return "Class has not started yet !!! , Early Boi"
 	else:
 		return time_table[day][period]
 
@@ -80,34 +101,56 @@ def class_next(day, time):
 		else:
 			period = 3
 
-	elif period == 5:
-		return "Class Ended Moron!"
+	elif day == 6:
+		return "It's SUNDAY"
+	elif period ==5:
+		return "Class Ended !!"
+	elif period == 10:
+		return time_table[day][0] + " class starts at [8:00 AM] "
 
 	return time_table[day][period+1]
 
 def next_period_start(period_num):
+	global day
 	start_time = ""
-	end_time = ""
+	#Sunday filter
+	if day == 6:
+		return start_time
+
 	if period_num == 0 or period_num==6:
 		start_time += "08:50"
-		end_time += "09:30"
 	elif period_num == 1 or period_num==7:
 		start_time += "09:40"
-		end_time += "10:20"
 	elif period_num == 2 or period_num==8:
 		start_time += "10:30"
-		end_time += "11:10"
 	elif period_num == 3 or period_num==9:
 		start_time = "11:20"
-		end_time = "12:00"
 	elif period_num == 4:
-		start_time = ""
-		end_time = ""		
+		start_time = ""		
 	elif period_num == 5:
 		start_time = ""
-		end_time = ""
 	return start_time
 
+def period_end(period_num):
+	global day
+	end_time = ""
+	#Sunday filter
+	if day == 6:
+		return end_time
+
+	if period_num in {6,7,8,9,5,10}:
+		end_time = ""
+	if period_num == 0:#First Period
+		end_time += " till 08:40"
+	elif period_num == 1:#Second Period
+		end_time += " till 09:30"
+	elif period_num == 2:#Third Period
+		end_time += " till 10:20"
+	elif period_num == 3:#Fourth Period
+		end_time = " till 11:10"
+	elif period_num == 4:#Fifth Period
+		end_time = " till 12:00"		
+	return end_time
 
 #*********************************************************
 class MyClient(discord.Client):
@@ -122,16 +165,28 @@ class MyClient(discord.Client):
         if message.author.id == self.user.id:
             return
 
-        if message.content.startswith('!hello'):
+        if message.content.startswith('?hello'):
             await message.channel.send('Hello {0.author.mention}'.format(message))
 
         if message.content.startswith('?classnext'):
-            await message.channel.send('{0.author.mention} '.format(message)+ class_next(day,time_now)+ " " + next_period_start(find_period(time_now)))
+        	refresh_time()
+        	await message.channel.send('{0.author.mention} '.format(message)+ class_next(day,time_now)+ " " + next_period_start(find_period(time_now)))
+
+        #removebelow
+        if message.content.startswith('?timenow'):
+        	refresh_time()
+        	await message.channel.send('{0.author.mention} '.format(message) + str(time_now))
 
         if message.content.startswith('?classnow'):
-            await message.channel.send('{0.author.mention} '.format(message)+ class_now(day,time_now))
+        	refresh_time()
+        	await message.channel.send('{0.author.mention} '.format(message)+ class_now(day,time_now) + period_end(find_period(time_now)))
+
+        if message.content.startswith('?classall'):
+        	refresh_time()
+        	if day != 6:
+        		await message.channel.send('{0.author.mention} '.format(message) + str(time_table[day][0:5]))
+        	else:
+        		await message.channel.send('{0.author.mention} '.format(message) + " It's SUNDAY")
 
 client = MyClient()
 client.run('NzM0Njk1MDI1NDg0NzU5MDUx.XxVw8g.nRYpVwQaNkNaJ7yLM-PI6m9R610')
-
-
