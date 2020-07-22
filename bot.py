@@ -38,10 +38,12 @@ def refresh_time():
 	global dt_now_str
 	global time_now
 	global hour_now
+	global date
 	global day
 
 	dt_now_str = str(datetime.now(ist))
-	day = datetime.strptime(date, '%Y-%m-%d').weekday()
+	date = dt_now_str[0:10]
+	day = datetime.strptime(date, '%Y-%m-%d').weekday()	
 	time_now = dt_now_str[11:16]
 	hour_now = dt_now_str[11:13]
 
@@ -169,6 +171,10 @@ class MyClient(discord.Client):
             await message.channel.send('Hello {0.author.mention}'.format(message))
 
         if message.content.startswith('?classnext'):
+        	refresh_time()
+        	await message.channel.send('{0.author.mention} '.format(message)+ class_next(day,time_now)+ " " + next_period_start(find_period(time_now)))
+
+        if message.content.startswith('?nextclass'):
         	refresh_time()
         	await message.channel.send('{0.author.mention} '.format(message)+ class_next(day,time_now)+ " " + next_period_start(find_period(time_now)))
 
