@@ -47,6 +47,7 @@ def refresh_time():
 	time_now = dt_now_str[11:16]
 	hour_now = dt_now_str[11:13]
 
+
 def find_period(current_time):
 	if current_time in break1:
 		return 6
@@ -89,6 +90,7 @@ def class_now(day, time):
 		return "Class has not started yet !!! , Early Boi"
 	else:
 		return time_table[day][period]
+
 
 # print(class_now(0, '19:20'))
 def class_next(day, time):
