@@ -1,4 +1,4 @@
-# ClassScheduleBot
+# Class Schedule Manager Bot
 ![Demo](Bot_demo.png)
 ## Overview
 
