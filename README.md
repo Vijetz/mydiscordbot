@@ -1,5 +1,5 @@
 # ClassScheduleBot
-![Demo](static/red_logo_vi_small.png)
+![Demo](Bot_demo.png)
 ## Overview
 
 ClassScheduleBot is a Discord bot designed to help you and your friends keep track of your online class schedule. It displays the current period and the upcoming period during online classes. This bot is especially useful for those who frequently ask, "Which is the next period?" during their chill sessions on Discord.
